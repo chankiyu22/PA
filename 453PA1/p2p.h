@@ -22,7 +22,7 @@ using namespace std;
  */
 class P2P : public Connect{
 public:
-  
+
   /**
    * Constructor
    * 

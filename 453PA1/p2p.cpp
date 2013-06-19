@@ -144,6 +144,7 @@ void P2P::getmeta(char* getCmd) {
  * Thread infomation helper
  */
 struct Info {
+  Server_Client sc;
   int count;
   Metadata mdata;
   char* filename;
@@ -156,12 +157,10 @@ struct Info {
  */
 void* fthread(void* _info) {
   Info info = *((Info*) _info);
-  Tuple tuple = info.mdata.tuple[info.count % 2];
+  Server_Client sc = info.sc;
 
   ofstream ofs;
   ofs.open(info.filename, fstream::out | fstream::binary);
-
-  Server_Client sc(tuple.port, tuple.IP);
 
   /**
    * Construct a valid TCP get string
@@ -208,20 +207,37 @@ void P2P::getdata(char* filename) {
    * An array of thread
    */
   pthread_t* dthread = new pthread_t[metadata.num_blocks];
-  for (int i = 0; i < metadata.num_blocks; i++) {
+
+  Server_Client* sc = new Server_Client[2];
+  sc[0] = Server_Client(metadata.tuple[0].port, 
+                        metadata.tuple[0].IP);
+  sc[1] = Server_Client(metadata.tuple[1].port,
+                        metadata.tuple[1].IP);
+  for (int i = 0; i < (metadata.num_blocks + 1)/2; i++) {
     /**
      * Constructing helper information
      */
     Info* info = new Info;
     info->filename = filename;
     info->mdata = metadata;
-    info->count = i+1;
-    pthread_create(dthread + i, NULL, fthread, (void*) info);
+    info->count = 2 * i;
+    info->sc = sc[0];
+    pthread_create(dthread + 2 * i, NULL, fthread, (void*) info);
+
+    Info* info2 = new Info;
+    info2->filename = filename;
+    info2->mdata = metadata;
+    info2->count = 2 * i + 1;
+    info2->sc = sc[1];
+    pthread_create(dthread + 2 * i + 1, NULL, fthread, (void*) info2);
+
+    pthread_join(dthread[2*i], NULL);
+    pthread_join(dthread[2*i + 1], NULL);
   }
 
   /**
    * Run thread
    */
-  for (int i = 0; i < metadata.num_blocks; i++) 
-    pthread_join(dthread[i], NULL);
+  // for (int i = 0; i < metadata.num_blocks; i++) 
+  //   pthread_join(dthread[i], NULL);
 }

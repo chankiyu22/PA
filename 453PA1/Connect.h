@@ -44,6 +44,7 @@ struct Metadata {
  */
 class Connect {
 public:
+  Connect() {}
   Connect(int port, char* server) {}
   virtual void getmeta(char* getCommand) = 0;
   virtual void getdata(char* filename) = 0;

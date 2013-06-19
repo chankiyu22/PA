@@ -18,6 +18,7 @@ using namespace std;
  */
 class Server_Client : public Connect{
 public:
+  Server_Client():Connect() {}
 
   /**
    * Constructor

@@ -27,6 +27,7 @@ Server_Client::Server_Client(int port, char* cserver) : Connect(port, cserver){
     cerr << "ERROR connecting" << endl;
     exit(0);
   }
+  cout << "Server Connect Success" << endl;
 }
 
 void Server_Client::getmeta(char* getCmd) {
